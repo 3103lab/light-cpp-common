@@ -135,8 +135,8 @@ namespace LCC
          */
         static void Trim(std::string& str) {
             const char* whitespace = " \t\r\n";
-            s.erase(0, s.find_first_not_of(whitespace));
-            s.erase(s.find_last_not_of(whitespace) + 1);
+            str.erase(0, str.find_first_not_of(whitespace));
+            str.erase(str.find_last_not_of(whitespace) + 1);
         }
 
     private:

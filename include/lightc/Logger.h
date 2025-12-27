@@ -408,50 +408,50 @@ namespace LCC
  *****************************************************************************/
 // LCCライブラリ用標準
 #define LCC_LOG_DUMP(...) \
-    Logger::Instance().WriteFormatWithContext(k_unLogKindIndexLccDump, __FILE__, __LINE__, __func__, __VA_ARGS__)
+    LCC::Logger::Instance().WriteFormatWithContext(LCC::k_unLogKindIndexLccDump, __FILE__, __LINE__, __func__, __VA_ARGS__)
 
 #define LCC_LOG_DETAIL(...) \
-    Logger::Instance().WriteFormatWithContext(k_unLogKindIndexLccDetail, __FILE__, __LINE__, __func__, __VA_ARGS__)
+    LCC::Logger::Instance().WriteFormatWithContext(LCC::k_unLogKindIndexLccDetail, __FILE__, __LINE__, __func__, __VA_ARGS__)
 
 #define LCC_LOG_DEBUG(...) \
-    Logger::Instance().WriteFormatWithContext(k_unLogKindIndexLccDebug, __FILE__, __LINE__, __func__, __VA_ARGS__)
+    LCC::Logger::Instance().WriteFormatWithContext(LCC::k_unLogKindIndexLccDebug, __FILE__, __LINE__, __func__, __VA_ARGS__)
 
 #define LCC_LOG_INFO(...) \
-    Logger::Instance().WriteFormatWithContext(k_unLogKindIndexLccInfo, __FILE__, __LINE__, __func__, __VA_ARGS__)
+    LCC::Logger::Instance().WriteFormatWithContext(LCC::k_unLogKindIndexLccInfo, __FILE__, __LINE__, __func__, __VA_ARGS__)
 
 #define LCC_LOG_SEND(...) \
-    Logger::Instance().WriteFormatWithContext(k_unLogKindIndexLccSend, __FILE__, __LINE__, __func__, __VA_ARGS__)
+    LCC::Logger::Instance().WriteFormatWithContext(LCC::k_unLogKindIndexLccSend, __FILE__, __LINE__, __func__, __VA_ARGS__)
 
 #define LCC_LOG_RECV(...) \
-    Logger::Instance().WriteFormatWithContext(k_unLogKindIndexLccRecv, __FILE__, __LINE__, __func__, __VA_ARGS__)
+    LCC::Logger::Instance().WriteFormatWithContext(LCC::k_unLogKindIndexLccRecv, __FILE__, __LINE__, __func__, __VA_ARGS__)
 
 #define LCC_LOG_ALERT(...) \
-    Logger::Instance().WriteFormatWithContext(k_unLogKindIndexLccAlert, __FILE__, __LINE__, __func__, __VA_ARGS__)
+    LCC::Logger::Instance().WriteFormatWithContext(LCC::k_unLogKindIndexLccAlert, __FILE__, __LINE__, __func__, __VA_ARGS__)
 
 #define LCC_LOG_ERROR(...) \
-    Logger::Instance().WriteFormatWithContext(k_unLogKindIndexLccError, __FILE__, __LINE__, __func__, __VA_ARGS__)
+    LCC::Logger::Instance().WriteFormatWithContext(LCC::k_unLogKindIndexLccError, __FILE__, __LINE__, __func__, __VA_ARGS__)
 
 // 標準
 #define LOG_DUMP(...) \
-    Logger::Instance().WriteFormatWithContext(k_unLogKindIndexAppDump, __FILE__, __LINE__, __func__, __VA_ARGS__)
+    LCC::Logger::Instance().WriteFormatWithContext(LCC::k_unLogKindIndexAppDump, __FILE__, __LINE__, __func__, __VA_ARGS__)
 
 #define LOG_DETAIL(...) \
-    Logger::Instance().WriteFormatWithContext(k_unLogKindIndexAppDetail, __FILE__, __LINE__, __func__, __VA_ARGS__)
+    LCC::Logger::Instance().WriteFormatWithContext(LCC::k_unLogKindIndexAppDetail, __FILE__, __LINE__, __func__, __VA_ARGS__)
 
 #define LOG_DEBUG(...) \
-    Logger::Instance().WriteFormatWithContext(k_unLogKindIndexAppDebug, __FILE__, __LINE__, __func__, __VA_ARGS__)
+    LCC::Logger::Instance().WriteFormatWithContext(LCC::k_unLogKindIndexAppDebug, __FILE__, __LINE__, __func__, __VA_ARGS__)
 
 #define LOG_INFO(...) \
-    Logger::Instance().WriteFormatWithContext(k_unLogKindIndexAppInfo, __FILE__, __LINE__, __func__, __VA_ARGS__)
+    LCC::Logger::Instance().WriteFormatWithContext(LCC::k_unLogKindIndexAppInfo, __FILE__, __LINE__, __func__, __VA_ARGS__)
 
 #define LOG_SEND(...) \
-    Logger::Instance().WriteFormatWithContext(k_unLogKindIndexAppSend, __FILE__, __LINE__, __func__, __VA_ARGS__)
+    LCC::Logger::Instance().WriteFormatWithContext(LCC::k_unLogKindIndexAppSend, __FILE__, __LINE__, __func__, __VA_ARGS__)
 
 #define LOG_RECV(...) \
-    Logger::Instance().WriteFormatWithContext(k_unLogKindIndexAppRecv, __FILE__, __LINE__, __func__, __VA_ARGS__)
+    LCC::Logger::Instance().WriteFormatWithContext(LCC::k_unLogKindIndexAppRecv, __FILE__, __LINE__, __func__, __VA_ARGS__)
 
 #define LOG_ALERT(...) \
-    Logger::Instance().WriteFormatWithContext(k_unLogKindIndexAppAlert, __FILE__, __LINE__, __func__, __VA_ARGS__)
+    LCC::Logger::Instance().WriteFormatWithContext(LCC::k_unLogKindIndexAppAlert, __FILE__, __LINE__, __func__, __VA_ARGS__)
 
 #define LOG_ERROR(...) \
-    Logger::Instance().WriteFormatWithContext(k_unLogKindIndexAppError, __FILE__, __LINE__, __func__, __VA_ARGS__)
+    LCC::Logger::Instance().WriteFormatWithContext(LCC::k_unLogKindIndexAppError, __FILE__, __LINE__, __func__, __VA_ARGS__)
