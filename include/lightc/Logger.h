@@ -14,9 +14,6 @@
  */
 #pragma once
 
-#include "MessageDriven.h"
-#include "WorkerThreadBase.h"
-#include "TimeStamp.h"
 #include <mutex>
 #include <sstream>
 #include <memory>
@@ -31,6 +28,9 @@
 #include <fstream>
 #include <filesystem>
 #include <cstring>
+#include "EventDriven.h"
+#include "WorkerThreadBase.h"
+#include "TimeStamp.h"
 
 namespace LCC
 {
@@ -71,7 +71,7 @@ namespace LCC
      *          ログのファイル出力、ログファイルの自動ローテーションを提供します。
      *           
      *****************************************************************************/
-    class Logger : public MessageDriven<std::string>
+    class Logger : public EventDriven<std::string>
     {
     public:
         /******************************************************************************
@@ -97,7 +97,7 @@ namespace LCC
             std::lock_guard<std::mutex> lock(m_mutex);
             if (!m_spWorker) {
                 m_spWorker = std::make_unique<WorkerThreadBase<std::string>>(
-                    std::shared_ptr<MessageDriven<std::string>>(&Instance(), [](void*) {}));
+                    std::shared_ptr<EventDriven<std::string>>(&Instance(), [](void*) {}));
                 m_spWorker->Start();
             }
         }
@@ -242,7 +242,7 @@ namespace LCC
          * @retval  なし
          * @note    ファイル出力（ログファイルのオープン、切替、古いログの削除）および標準出力に出力する
          *****************************************************************************/
-        void OnMessage(const std::string& msg) override {
+        void vOnEvent(const std::string& msg) override {
             std::lock_guard<std::mutex> lock(m_fileMutex);
 
             std::string strNewPath = MakeLogFilePath();

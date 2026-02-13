@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 /******************************************************************************
- * @file    MessageDriven.h
+ * @file    EventDriven.h
  * @brief   C++/Common Library Message Driven Process
  * @author  Hikari Satoh
  * @note    
@@ -16,12 +16,12 @@
 
 namespace LCC
 {
-    template<typename TMessage>
-    class MessageDriven
+    template<typename TEvent_>
+    class EventDriven
     {
     public:
-        MessageDriven() = default;
-        virtual ~MessageDriven() = default;
+        EventDriven() = default;
+        virtual ~EventDriven() = default;
 
         /******************************************************************************
          * @brief   メッセージ送信
@@ -30,8 +30,8 @@ namespace LCC
          * @retval  true:成功 false:停止済み
          * @note
          *****************************************************************************/
-        bool Post(const TMessage& msg) {
-            return m_queMessage.Enq(msg);
+        bool Post(const TEvent_& msg) {
+            return m_queEvent.Enq(msg);
         }
 
         /******************************************************************************
@@ -42,26 +42,26 @@ namespace LCC
          * @retval  なし
          * @note
          *****************************************************************************/
-        void Run(const std::function<bool()>& bContinue, uint64_t unTimeout = 0) {
-            TMessage msg;
-            while (bContinue()) {
-                if (m_queMessage.Deq(msg, unTimeout)) {
+        void Run(const std::function<bool()>& fnContinue, uint64_t unTimeout = 0) {
+            TEvent_ msg;
+            while (fnContinue()) {
+                if (m_queEvent.Deq(msg, unTimeout)) {
                     try {
-                        OnMessage(msg);
+                        vOnEvent(msg);
                     } catch (const std::exception& ex) {
-                        LogOnMessageException(ex);
+                        LogOnEventException(ex);
                     } catch (...) {
-                        LogOnMessageException();
+                        LogOnEventException();
                     }
                 }
             }
         }
 
-        void Shutdown() { m_queMessage.Shutdown(); }
-        bool IsShutdown() const { return m_queMessage.IsShutdown(); }
+        void Shutdown() { m_queEvent.Shutdown(); }
+        bool IsShutdown() const { return m_queEvent.IsShutdown(); }
 
     protected:
-        virtual void OnMessage(const TMessage& msg) = 0;
+        virtual void vOnEvent(const TEvent_& msg) = 0;
 
 
         /******************************************************************************
@@ -73,9 +73,9 @@ namespace LCC
          *          循環参照になるためLoggerではロギングできない
          *          仮想関数にしておくので、Loggerを使う場合はオーバーライドすること
          *****************************************************************************/
-        virtual void LogOnMessageException(const std::exception& ex) {
-            std::cerr << "Exception in OnMessage: " << ex.what() << std::endl;
-            // LOG_ERROR("Exception in OnMessage(): %s", ex.what());
+        virtual void LogOnEventException(const std::exception& ex) {
+            std::cerr << "Exception in OnEvent: " << ex.what() << std::endl;
+            // LOG_ERROR("Exception in OnEvent(): %s", ex.what());
         }
 
         /******************************************************************************
@@ -87,12 +87,12 @@ namespace LCC
          *          循環参照になるためLoggerではロギングできない
          *          仮想関数にしておくので、Loggerを使う場合はオーバーライドすること
          *****************************************************************************/
-        virtual void LogOnMessageException() {
-            std::cerr << "Unknown Exception in OnMessage" << std::endl;
-            // LOG_ERROR("Unknown Exception in OnMessage(): %s");
+        virtual void LogOnEventException() {
+            std::cerr << "Unknown Exception in OnEvent" << std::endl;
+            // LOG_ERROR("Unknown Exception in OnEvent(): %s");
         }
 
     private:
-        LockedQueue<TMessage> m_queMessage;
+        LockedQueue<TEvent_> m_queEvent;
     };
 }
