@@ -110,6 +110,12 @@ public:
     void Stop()
     {
 		m_bRunning.store(false);
+        
+        // SIGUSR2をraiseして、シグナル待受スレッドを起こす
+        if (std::raise(SIGUSR2) != 0) {
+            LCC_LOG_ALERT("Failed to raise SIGUSR2 in Stop(). Signal thread may not terminate immediately.");
+        }
+        
         vOnStop();
         Shutdown(); // MessageDriven のシャットダウン
     }
