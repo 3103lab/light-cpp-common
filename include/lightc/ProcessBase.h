@@ -23,6 +23,7 @@
 #include <memory>
 #include <chrono>
 #include <cstdlib>
+#include <stdexcept>
 
 #include <lightc/EventDriven.h>
 #include <lightc/ProcessEvent.h>
@@ -124,8 +125,16 @@ public:
             const std::string& strEventName, fnMessageHandler fnHandler)
     {
         LCC_LOG_INFO("Register Message handler for EventName[%s].", strEventName.c_str());
-        std::lock_guard<std::mutex> lock(m_cMessageHandlerMutex);
-        m_mapMessageHandler.emplace(strEventName, fnHandler);
+        {
+            std::lock_guard<std::mutex> lock(m_cMessageHandlerMutex);
+            m_mapMessageHandler.emplace(strEventName, fnHandler);
+        } // mutex unlock provides release fence
+        
+        // SIGUSR2をraiseして、シグナル待受スレッドを起こす
+        // (シグナルスレッドが次にmutexを獲得する際、更新が確実に可視化される)
+        if (std::raise(SIGUSR2) != 0) {
+            LCC_LOG_ALERT("Failed to raise SIGUSR2. Handler may not be activated immediately.");
+        }
     }
 
     /******************************************************************************
@@ -148,13 +157,24 @@ public:
      * @arg     fn       (in) 登録するハンドラ関数
      * @return  なし
      * @note    同一シグナル番号が登録されていた場合は上書きする
-	 *          必ずvOnInitializeの中で登録してください
-	 *          Start()の呼び出し後に登録されたシグナルハンドラは呼び出されません
+	 *          SIGUSR2は内部で使用されているため登録できません
+	 * @throw   std::logic_error SIGUSR2を登録しようとした場合
 	 *****************************************************************************/
     void RegisterSignalHandler(SignalNo snSignal, fnSignalHandler fnHandler) {
+        if (snSignal == SIGUSR2) {
+            throw std::logic_error("Cannot register SIGUSR2 handler: it is reserved for internal use");
+        }
+        
         LCC_LOG_INFO("Register Signal handler for SignalNo[%lu].", snSignal);
-        std::lock_guard<std::mutex> lk(m_cSignalHandlerMutex);
-        m_mapSignalHandler.emplace(snSignal, fnHandler);
+        {
+            std::lock_guard<std::mutex> lk(m_cSignalHandlerMutex);
+            m_mapSignalHandler.emplace(snSignal, fnHandler);
+        }
+        
+        // SIGUSR2をraiseして、シグナル待受スレッドを起こす
+        if (std::raise(SIGUSR2) != 0) {
+            LCC_LOG_ALERT("Failed to raise SIGUSR2. Handler may not be activated immediately.");
+        }
     }
 
 	// IniFileクラスのインスタンスを取得する
@@ -345,7 +365,6 @@ protected:
     {
         while( m_bRunning.load() )
 		{
-            // シグナル待受対象のコピーをロック下で作成する
 			std::list<SignalNo> listSignal;
             {
                 std::lock_guard<std::mutex> lk(m_cSignalHandlerMutex);
@@ -353,9 +372,16 @@ protected:
                     listSignal.push_back(snSignal);
                 }
             }
+            
+            // SIGUSR2をハンドラ更新通知用に追加
+            listSignal.push_back(SIGUSR2);
 
-            // ロックを解放してからシグナル待受に入る
             SignalNo snSignal = Signal::Wait(listSignal);
+
+            // SIGUSR2の場合はハンドラ更新なので、イベントをPostせずに次のループへ
+            if (snSignal == SIGUSR2) {
+                continue;
+            }
 
             SignalEvent cSignalEvent{};
             cSignalEvent.snSignal = snSignal;
