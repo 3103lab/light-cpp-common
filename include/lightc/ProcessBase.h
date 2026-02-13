@@ -345,12 +345,16 @@ protected:
     {
         while( m_bRunning.load() )
 		{
-            std::lock_guard<std::mutex> lk(m_cSignalHandlerMutex);
-            
+            // シグナル待受対象のコピーをロック下で作成する
 			std::list<SignalNo> listSignal;
-            for (auto& [snSignal, spClientInfo] : m_mapSignalHandler) {
-                listSignal.push_back(snSignal);
-			}
+            {
+                std::lock_guard<std::mutex> lk(m_cSignalHandlerMutex);
+                for (auto& [snSignal, spClientInfo] : m_mapSignalHandler) {
+                    listSignal.push_back(snSignal);
+                }
+            }
+
+            // ロックを解放してからシグナル待受に入る
             SignalNo snSignal = Signal::Wait(listSignal);
 
             SignalEvent cSignalEvent{};
