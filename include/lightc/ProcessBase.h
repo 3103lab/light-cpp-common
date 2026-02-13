@@ -151,13 +151,15 @@ public:
      * @arg     fn       (in) 登録するハンドラ関数
      * @return  なし
      * @note    同一シグナル番号が登録されていた場合は上書きする
-	 *          必ずvOnInitializeの中で登録してください
-	 *          Start()の呼び出し後に登録されたシグナルハンドラは呼び出されません
+	 *          Start()の呼び出し後でも動的に登録可能です
 	 *****************************************************************************/
     void RegisterSignalHandler(SignalNo snSignal, fnSignalHandler fnHandler) {
         LCC_LOG_INFO("Register Signal handler for SignalNo[%lu].", snSignal);
         std::lock_guard<std::mutex> lk(m_cSignalHandlerMutex);
         m_mapSignalHandler.emplace(snSignal, fnHandler);
+        
+        // SIGUSR2をraiseして、シグナル待受スレッドを起こす
+        std::raise(SIGUSR2);
     }
 
 	// IniFileクラスのインスタンスを取得する
