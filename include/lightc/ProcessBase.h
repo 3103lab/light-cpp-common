@@ -339,13 +339,19 @@ protected:
      * @brief   シグナル待ち受けスレッド
      * @arg     なし
      * @return  なし
-     * @note    sigwaitでシグナルを待ち受け、受信したらイベントとしてPostする
+     * @note    シグナルを待ち受け、受信したらイベントとしてPostする
 	 *****************************************************************************/
     void vSignalWaitThread()
     {
         while( m_bRunning.load() )
 		{
-            SignalNo snSignal = Signal::Wait({ SIGTERM, SIGINT });
+            std::lock_guard<std::mutex> lk(m_cSignalHandlerMutex);
+            
+			std::list<SignalNo> listSignal;
+            for (auto& [snSignal, spClientInfo] : m_mapSignalHandler) {
+                listSignal.push_back(snSignal);
+			}
+            SignalNo snSignal = Signal::Wait(listSignal);
 
             SignalEvent cSignalEvent{};
             cSignalEvent.snSignal = snSignal;
