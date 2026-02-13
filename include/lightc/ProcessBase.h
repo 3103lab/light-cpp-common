@@ -23,6 +23,7 @@
 #include <memory>
 #include <chrono>
 #include <cstdlib>
+#include <stdexcept>
 
 #include <lightc/EventDriven.h>
 #include <lightc/ProcessEvent.h>
@@ -154,13 +155,12 @@ public:
      * @arg     fn       (in) 登録するハンドラ関数
      * @return  なし
      * @note    同一シグナル番号が登録されていた場合は上書きする
-	 *          Start()の呼び出し後でも動的に登録可能です
 	 *          SIGUSR2は内部で使用されているため登録できません
+	 * @throw   std::logic_error SIGUSR2を登録しようとした場合
 	 *****************************************************************************/
     void RegisterSignalHandler(SignalNo snSignal, fnSignalHandler fnHandler) {
         if (snSignal == SIGUSR2) {
-            LCC_LOG_ERROR("Cannot register SIGUSR2 handler - it is reserved for internal use. Please use a different signal number.");
-            return;
+            throw std::logic_error("Cannot register SIGUSR2 handler - it is reserved for internal use");
         }
         
         LCC_LOG_INFO("Register Signal handler for SignalNo[%lu].", snSignal);
