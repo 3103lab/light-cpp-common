@@ -132,7 +132,9 @@ public:
         
         // SIGUSR2をraiseして、シグナル待受スレッドを起こす
         // (mutex unlock above ensures visibility of handler map updates)
-        std::raise(SIGUSR2);
+        if (std::raise(SIGUSR2) != 0) {
+            LCC_LOG_ALERT("Failed to raise SIGUSR2. Handler may not be activated immediately.");
+        }
     }
 
     /******************************************************************************
@@ -160,7 +162,7 @@ public:
 	 *****************************************************************************/
     void RegisterSignalHandler(SignalNo snSignal, fnSignalHandler fnHandler) {
         if (snSignal == SIGUSR2) {
-            throw std::logic_error("Cannot register SIGUSR2 handler - it is reserved for internal use");
+            throw std::logic_error("Cannot register SIGUSR2 handler: it is reserved for internal use");
         }
         
         LCC_LOG_INFO("Register Signal handler for SignalNo[%lu].", snSignal);
@@ -171,7 +173,9 @@ public:
         
         // SIGUSR2をraiseして、シグナル待受スレッドを起こす
         // (mutex unlock above ensures visibility of handler map updates)
-        std::raise(SIGUSR2);
+        if (std::raise(SIGUSR2) != 0) {
+            LCC_LOG_ALERT("Failed to raise SIGUSR2. Handler may not be activated immediately.");
+        }
     }
 
 	// IniFileクラスのインスタンスを取得する
