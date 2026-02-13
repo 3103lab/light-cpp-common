@@ -126,6 +126,9 @@ public:
         LCC_LOG_INFO("Register Message handler for EventName[%s].", strEventName.c_str());
         std::lock_guard<std::mutex> lock(m_cMessageHandlerMutex);
         m_mapMessageHandler.emplace(strEventName, fnHandler);
+        
+        // SIGUSR2をraiseして、シグナル待受スレッドを起こす
+        std::raise(SIGUSR2);
     }
 
     /******************************************************************************
@@ -353,9 +356,17 @@ protected:
                     listSignal.push_back(snSignal);
                 }
             }
+            
+            // SIGUSR2を常に追加（ハンドラ更新通知用）
+            listSignal.push_back(SIGUSR2);
 
             // ロックを解放してからシグナル待受に入る
             SignalNo snSignal = Signal::Wait(listSignal);
+
+            // SIGUSR2の場合はハンドラ更新なので、イベントをPostせずに次のループへ
+            if (snSignal == SIGUSR2) {
+                continue;
+            }
 
             SignalEvent cSignalEvent{};
             cSignalEvent.snSignal = snSignal;
