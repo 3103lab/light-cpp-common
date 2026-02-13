@@ -169,10 +169,9 @@ public:
         {
             std::lock_guard<std::mutex> lk(m_cSignalHandlerMutex);
             m_mapSignalHandler.emplace(snSignal, fnHandler);
-        } // mutex unlock provides release fence
+        }
         
         // SIGUSR2をraiseして、シグナル待受スレッドを起こす
-        // (シグナルスレッドが次にmutexを獲得する際、更新が確実に可視化される)
         if (std::raise(SIGUSR2) != 0) {
             LCC_LOG_ALERT("Failed to raise SIGUSR2. Handler may not be activated immediately.");
         }
@@ -366,7 +365,6 @@ protected:
     {
         while( m_bRunning.load() )
 		{
-            // シグナル待受対象のコピーをロック下で作成する
 			std::list<SignalNo> listSignal;
             {
                 std::lock_guard<std::mutex> lk(m_cSignalHandlerMutex);
@@ -375,10 +373,9 @@ protected:
                 }
             }
             
-            // SIGUSR2を常に追加（ハンドラ更新通知用）
+            // SIGUSR2をハンドラ更新通知用に追加
             listSignal.push_back(SIGUSR2);
 
-            // ロックを解放してからシグナル待受に入る
             SignalNo snSignal = Signal::Wait(listSignal);
 
             // SIGUSR2の場合はハンドラ更新なので、イベントをPostせずに次のループへ
