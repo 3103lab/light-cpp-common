@@ -127,9 +127,10 @@ public:
         {
             std::lock_guard<std::mutex> lock(m_cMessageHandlerMutex);
             m_mapMessageHandler.emplace(strEventName, fnHandler);
-        }
+        } // mutex unlock provides release fence - changes are visible to other threads
         
         // SIGUSR2をraiseして、シグナル待受スレッドを起こす
+        // (mutex unlock above ensures visibility of handler map updates)
         std::raise(SIGUSR2);
     }
 
@@ -158,7 +159,7 @@ public:
 	 *****************************************************************************/
     void RegisterSignalHandler(SignalNo snSignal, fnSignalHandler fnHandler) {
         if (snSignal == SIGUSR2) {
-            LCC_LOG_ERROR("Cannot register SIGUSR2 handler - it is reserved for internal use.");
+            LCC_LOG_ERROR("Cannot register SIGUSR2 handler - it is reserved for internal use. Please use a different signal number.");
             return;
         }
         
@@ -166,9 +167,10 @@ public:
         {
             std::lock_guard<std::mutex> lk(m_cSignalHandlerMutex);
             m_mapSignalHandler.emplace(snSignal, fnHandler);
-        }
+        } // mutex unlock provides release fence - changes are visible to other threads
         
         // SIGUSR2をraiseして、シグナル待受スレッドを起こす
+        // (mutex unlock above ensures visibility of handler map updates)
         std::raise(SIGUSR2);
     }
 
