@@ -152,8 +152,14 @@ public:
      * @return  なし
      * @note    同一シグナル番号が登録されていた場合は上書きする
 	 *          Start()の呼び出し後でも動的に登録可能です
+	 *          SIGUSR2は内部で使用されているため登録できません
 	 *****************************************************************************/
     void RegisterSignalHandler(SignalNo snSignal, fnSignalHandler fnHandler) {
+        if (snSignal == SIGUSR2) {
+            LCC_LOG_ERROR("Cannot register SIGUSR2 handler - it is reserved for internal use.");
+            return;
+        }
+        
         LCC_LOG_INFO("Register Signal handler for SignalNo[%lu].", snSignal);
         std::lock_guard<std::mutex> lk(m_cSignalHandlerMutex);
         m_mapSignalHandler.emplace(snSignal, fnHandler);
