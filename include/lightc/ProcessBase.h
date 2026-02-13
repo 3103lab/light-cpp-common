@@ -24,6 +24,7 @@
 #include <chrono>
 #include <cstdlib>
 #include <stdexcept>
+#include <cerrno>
 
 #include <lightc/EventDriven.h>
 #include <lightc/ProcessEvent.h>
@@ -133,7 +134,7 @@ public:
         // SIGUSR2をraiseして、シグナル待受スレッドを起こす
         // (mutex unlock above ensures visibility of handler map updates)
         if (std::raise(SIGUSR2) != 0) {
-            LCC_LOG_ALERT("Failed to raise SIGUSR2. Handler may not be activated immediately.");
+            LCC_LOG_ALERT("Failed to raise SIGUSR2 (errno=%d). Handler may not be activated immediately.", errno);
         }
     }
 
@@ -174,7 +175,7 @@ public:
         // SIGUSR2をraiseして、シグナル待受スレッドを起こす
         // (mutex unlock above ensures visibility of handler map updates)
         if (std::raise(SIGUSR2) != 0) {
-            LCC_LOG_ALERT("Failed to raise SIGUSR2. Handler may not be activated immediately.");
+            LCC_LOG_ALERT("Failed to raise SIGUSR2 (errno=%d). Handler may not be activated immediately.", errno);
         }
     }
 
