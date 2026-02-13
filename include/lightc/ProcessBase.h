@@ -124,8 +124,10 @@ public:
             const std::string& strEventName, fnMessageHandler fnHandler)
     {
         LCC_LOG_INFO("Register Message handler for EventName[%s].", strEventName.c_str());
-        std::lock_guard<std::mutex> lock(m_cMessageHandlerMutex);
-        m_mapMessageHandler.emplace(strEventName, fnHandler);
+        {
+            std::lock_guard<std::mutex> lock(m_cMessageHandlerMutex);
+            m_mapMessageHandler.emplace(strEventName, fnHandler);
+        }
         
         // SIGUSR2をraiseして、シグナル待受スレッドを起こす
         std::raise(SIGUSR2);
@@ -161,8 +163,10 @@ public:
         }
         
         LCC_LOG_INFO("Register Signal handler for SignalNo[%lu].", snSignal);
-        std::lock_guard<std::mutex> lk(m_cSignalHandlerMutex);
-        m_mapSignalHandler.emplace(snSignal, fnHandler);
+        {
+            std::lock_guard<std::mutex> lk(m_cSignalHandlerMutex);
+            m_mapSignalHandler.emplace(snSignal, fnHandler);
+        }
         
         // SIGUSR2をraiseして、シグナル待受スレッドを起こす
         std::raise(SIGUSR2);
