@@ -23,7 +23,7 @@ namespace LCC
     class WorkerThreadBase
     {
     public:
-        explicit WorkerThreadBase(std::shared_ptr<MessageDriven<TMessage>> spMessageDriven)
+        explicit WorkerThreadBase(std::shared_ptr<EventDriven<TMessage>> spMessageDriven)
             : m_spMessageDriven(std::move(spMessageDriven)), m_bRunning(false)
         {
         }
@@ -72,7 +72,7 @@ namespace LCC
         }
 
     private:
-        std::shared_ptr<MessageDriven<TMessage>> m_spMessageDriven;
+        std::shared_ptr<EventDriven<TMessage>> m_spMessageDriven;
         std::atomic_bool m_bRunning;
         std::thread m_thread;
     };
