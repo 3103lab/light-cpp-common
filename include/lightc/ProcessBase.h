@@ -24,7 +24,6 @@
 #include <chrono>
 #include <cstdlib>
 #include <stdexcept>
-#include <cerrno>
 
 #include <lightc/EventDriven.h>
 #include <lightc/ProcessEvent.h>
@@ -129,12 +128,12 @@ public:
         {
             std::lock_guard<std::mutex> lock(m_cMessageHandlerMutex);
             m_mapMessageHandler.emplace(strEventName, fnHandler);
-        } // mutex unlock provides release fence - changes are visible to other threads
+        } // mutex unlock provides release fence
         
         // SIGUSR2をraiseして、シグナル待受スレッドを起こす
-        // (mutex unlock above ensures visibility of handler map updates)
+        // (シグナルスレッドが次にmutexを獲得する際、更新が確実に可視化される)
         if (std::raise(SIGUSR2) != 0) {
-            LCC_LOG_ALERT("Failed to raise SIGUSR2 (errno=%d). Handler may not be activated immediately.", errno);
+            LCC_LOG_ALERT("Failed to raise SIGUSR2. Handler may not be activated immediately.");
         }
     }
 
@@ -170,12 +169,12 @@ public:
         {
             std::lock_guard<std::mutex> lk(m_cSignalHandlerMutex);
             m_mapSignalHandler.emplace(snSignal, fnHandler);
-        } // mutex unlock provides release fence - changes are visible to other threads
+        } // mutex unlock provides release fence
         
         // SIGUSR2をraiseして、シグナル待受スレッドを起こす
-        // (mutex unlock above ensures visibility of handler map updates)
+        // (シグナルスレッドが次にmutexを獲得する際、更新が確実に可視化される)
         if (std::raise(SIGUSR2) != 0) {
-            LCC_LOG_ALERT("Failed to raise SIGUSR2 (errno=%d). Handler may not be activated immediately.", errno);
+            LCC_LOG_ALERT("Failed to raise SIGUSR2. Handler may not be activated immediately.");
         }
     }
 
