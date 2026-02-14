@@ -69,6 +69,7 @@ public:
     virtual ~ProcessBase()
     {
         Shutdown();
+        Logger::Instance().Stop();
     }
 
     /******************************************************************************
@@ -110,6 +111,10 @@ public:
     void Stop()
     {
 		m_bRunning.store(false);
+        
+        // シグナル待受スレッドのブロッキングを解除する
+        LCC::Signal::Raise(SIGUSR2);
+        
         vOnStop();
         Shutdown(); // MessageDriven のシャットダウン
     }
@@ -130,11 +135,8 @@ public:
             m_mapMessageHandler.emplace(strEventName, fnHandler);
         } // mutex unlock provides release fence
         
-        // SIGUSR2をraiseして、シグナル待受スレッドを起こす
-        // (シグナルスレッドが次にmutexを獲得する際、更新が確実に可視化される)
-        if (std::raise(SIGUSR2) != 0) {
-            LCC_LOG_ALERT("Failed to raise SIGUSR2. Handler may not be activated immediately.");
-        }
+        // シグナル待受スレッドのブロッキングを解除する
+        LCC::Signal::Raise(SIGUSR2);
     }
 
     /******************************************************************************
@@ -171,10 +173,8 @@ public:
             m_mapSignalHandler.emplace(snSignal, fnHandler);
         }
         
-        // SIGUSR2をraiseして、シグナル待受スレッドを起こす
-        if (std::raise(SIGUSR2) != 0) {
-            LCC_LOG_ALERT("Failed to raise SIGUSR2. Handler may not be activated immediately.");
-        }
+        // シグナル待受スレッドのブロッキングを解除する
+        LCC::Signal::Raise(SIGUSR2);
     }
 
 	// IniFileクラスのインスタンスを取得する

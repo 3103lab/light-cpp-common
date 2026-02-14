@@ -20,6 +20,9 @@
 #include <thread>
 #include <chrono>
 
+#ifndef SIGUSR2
+#define SIGUSR2 10002
+#endif
 
 namespace LCC::Signal
 {
@@ -40,6 +43,19 @@ inline void vSignalHandler(int snSig)
     g_snSignal.store(snSig, std::memory_order_relaxed);
 }
 
+/******************************************************************************
+ * @brief   シグナル発生
+ * @param   snSig   (in)    発生させるシグナル番号
+ * @return  なし
+ * @retval  なし
+ * @note
+ *****************************************************************************
+ */
+inline void Raise(int64_t snSig)
+{
+    if (snSig == 0) return;
+    g_snSignal.store(static_cast<int>(snSig), std::memory_order_relaxed);
+}
 
 /******************************************************************************
  * @brief   シグナル待機
