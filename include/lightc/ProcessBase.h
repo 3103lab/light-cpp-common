@@ -35,7 +35,7 @@
 
 namespace LCC
 {
-	
+
 using fnMessageHandler = std::function<void(const MessageEvent&)>;
 using fnTimerHandler   = std::function<void(const TimerEvent&)>;
 using fnSignalHandler  = std::function<void(const SignalEvent&)>;
@@ -83,7 +83,7 @@ public:
     {
         vArgumentAnalyze(argc, argv);
         vLoadConfig();
-		std::shared_ptr<ProcessBase> spThis = shared_from_this();
+        std::shared_ptr<ProcessBase> spThis = shared_from_this();
         m_pcTimerManager = std::make_unique<TimerManager<ProcessEvent>>(spThis);
         
         vOnInitialize();
@@ -110,7 +110,7 @@ public:
      *****************************************************************************/
     void Stop()
     {
-		    m_bRunning.store(false);
+        m_bRunning.store(false);
         // シグナル待受スレッドのブロッキングを解除する
         LCC::Signal::Raise(SIGUSR2);
 
@@ -123,7 +123,7 @@ public:
      * @arg     strEventName (in) 登録するイベント名
      * @arg     fnHandler    (in) 登録するハンドラ関数
      * @return  なし
-	 * @note    同一イベント名が登録されていた場合は上書きする
+     * @note    同一イベント名が登録されていた場合は上書きする
      *****************************************************************************/
     void RegisterMessageHandler(
             const std::string& strEventName, fnMessageHandler fnHandler)
@@ -158,9 +158,9 @@ public:
      * @arg     fn       (in) 登録するハンドラ関数
      * @return  なし
      * @note    同一シグナル番号が登録されていた場合は上書きする
-	 *          SIGUSR2は内部で使用されているため登録できません
-	 * @throw   std::logic_error SIGUSR2を登録しようとした場合
-	 *****************************************************************************/
+     *          SIGUSR2は内部で使用されているため登録できません
+     * @throw   std::logic_error SIGUSR2を登録しようとした場合
+     *****************************************************************************/
     void RegisterSignalHandler(SignalNo snSignal, fnSignalHandler fnHandler) {
         if (snSignal == SIGUSR2) {
             throw std::logic_error("Cannot register SIGUSR2 handler: it is reserved for internal use");
@@ -176,9 +176,9 @@ public:
         LCC::Signal::Raise(SIGUSR2);
     }
 
-	// IniFileクラスのインスタンスを取得する
+    // IniFileクラスのインスタンスを取得する
     IniFile& GetIniFile() { return m_cIniFile; }
-	bool IsRunning() const { return m_bRunning.load(); }
+    bool IsRunning() const { return m_bRunning.load(); }
 
 protected:
     /******************************************************************************
@@ -232,7 +232,7 @@ protected:
      *****************************************************************************/
     inline void vDispatchMessage(const MessageEvent& cEvent)
     {
-		std::string strEventName = cEvent.strEventName;
+        const std::string strEventName = cEvent.strEventName;
 
         std::lock_guard<std::mutex> lock(m_cMessageHandlerMutex);
         const auto& itr = m_mapMessageHandler.find(strEventName);
@@ -258,7 +258,7 @@ protected:
      *****************************************************************************/
     inline void vDispatchTimer(const TimerEvent& cEvent)
     {
-        TimerId unTimerId = cEvent.unTimerId;
+        const TimerId unTimerId = cEvent.unTimerId;
 
         std::lock_guard<std::mutex> lock(m_cTimerHandlerMutex);
         const auto& itr = m_mapTimerHandler.find(unTimerId);
@@ -283,10 +283,10 @@ protected:
      * @arg     ev (in) 受信シグナルイベント
      * @return  なし
      * @note    登録された各ハンドラを呼び出す
-	 *****************************************************************************/
+     *****************************************************************************/
     void vDispatchSignal(const SignalEvent& cEvent) {
 
-        TimerId snSignal = cEvent.snSignal;
+        SignalNo snSignal = cEvent.snSignal;
 
         std::lock_guard<std::mutex> lock(m_cTimerHandlerMutex);
         const auto& itr = m_mapSignalHandler.find(snSignal);
@@ -359,12 +359,12 @@ protected:
      * @arg     なし
      * @return  なし
      * @note    シグナルを待ち受け、受信したらイベントとしてPostする
-	 *****************************************************************************/
+     *****************************************************************************/
     void vSignalWaitThread()
     {
         while( m_bRunning.load() )
-		{
-			std::list<SignalNo> listSignal;
+        {
+            std::list<SignalNo> listSignal;
             {
                 std::lock_guard<std::mutex> lk(m_cSignalHandlerMutex);
                 for (auto& [snSignal, spClientInfo] : m_mapSignalHandler) {
@@ -432,14 +432,14 @@ private:
         std::string strLogFilePrefix;
         std::string strLogDir;
 
-		bool bReadIniFileSuccess = false;
+        bool bReadIniFileSuccess = false;
         // iniファイル読み込み
         if (m_cIniFile.LoadFromFile(m_strIniFile)) {
             unLogMask        = static_cast<uint32_t>(std::stoul(m_cIniFile.Get("Log", "Mask",          "0xFFFFFFFF"), nullptr, 0));
             unExpireSec      = std::stoull(m_cIniFile.Get(                     "Log", "ExpireSec",     "0"         ));
             strLogFilePrefix = m_cIniFile.Get(                                 "Log", "LogFilePrefix", "Log"       );
             strLogDir        = m_cIniFile.Get(                                 "Log", "LogDir",        "../log"    );
-			bReadIniFileSuccess = true;
+            bReadIniFileSuccess = true;
         }
 
         // Logger設定
@@ -454,7 +454,7 @@ private:
         }
         else {
             LCC_LOG_ALERT("Failed to load config file [%s]. Using default settings.", m_strIniFile.c_str());
-		}
+        }
     }
 
     /******************************************************************************
@@ -471,17 +471,17 @@ private:
 
 private:
     // メンバ変数
-	std::atomic_bool  m_bRunning;              ///< プロセス稼働状態フラグ
+    std::atomic_bool  m_bRunning;              ///< プロセス稼働状態フラグ
     IniFile           m_cIniFile;              ///< iniファイルオブジェクト
     std::string       m_strIniFile;            ///< iniファイル名
     MessageHandlerMap m_mapMessageHandler;     ///< メッセージハンドラ群
     std::mutex        m_cMessageHandlerMutex;  ///< メッセージハンドラ保護用ミューテックス
     TimerHandlerMap   m_mapTimerHandler;       ///< タイマーハンドラ群
     std::mutex        m_cTimerHandlerMutex;    ///< タイマーハンドラ保護用ミューテックス
-	SignalHandlerMap  m_mapSignalHandler;      ///< シグナルハンドラ群
-	std::mutex        m_cSignalHandlerMutex;   ///< シグナルハンドラ保護用ミューテックス
+    SignalHandlerMap  m_mapSignalHandler;      ///< シグナルハンドラ群
+    std::mutex        m_cSignalHandlerMutex;   ///< シグナルハンドラ保護用ミューテックス
 
     std::unordered_map<std::string, std::string> m_mapArgument;     ///< 引数マップ
-	std::unique_ptr<TimerManager<ProcessEvent>>  m_pcTimerManager;  ///< タイマーマネージャ
+    std::unique_ptr<TimerManager<ProcessEvent>>  m_pcTimerManager;  ///< タイマーマネージャ
 };
 }
