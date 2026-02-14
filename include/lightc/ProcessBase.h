@@ -110,11 +110,10 @@ public:
      *****************************************************************************/
     void Stop()
     {
-		m_bRunning.store(false);
-        
+		    m_bRunning.store(false);
         // シグナル待受スレッドのブロッキングを解除する
         LCC::Signal::Raise(SIGUSR2);
-        
+
         vOnStop();
         Shutdown(); // MessageDriven のシャットダウン
     }
